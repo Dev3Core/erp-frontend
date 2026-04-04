@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ERP Frontend - Webcam Studio Management
 
-## Getting Started
+Multi-tenant ERP SaaS frontend for webcam studio management. Built with Next.js 15 (App Router), TypeScript, Tailwind CSS v4, and shadcn/ui.
 
-First, run the development server:
+## Tech Stack
+
+- Next.js 15 (App Router)
+- TypeScript 5 (strict mode)
+- Tailwind CSS v4
+- shadcn/ui (New York style, neutral base)
+- ESLint + Prettier
+- pnpm (package manager)
+- Docker (multi-stage production build)
+
+## Prerequisites
+
+- Node.js 22
+- pnpm (latest)
+
+## Local Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+# Install dependencies
+pnpm install
+
+# Start development server
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The application will be available at `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Available Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command              | Description                          |
+| -------------------- | ------------------------------------ |
+| `pnpm dev`           | Start development server             |
+| `pnpm build`         | Create production build              |
+| `pnpm start`         | Start production server              |
+| `pnpm lint`          | Run ESLint                           |
+| `pnpm type-check`    | Run TypeScript type checking         |
+| `pnpm format`        | Format code with Prettier            |
+| `pnpm format:check`  | Check code formatting                |
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+  app/
+    layout.tsx              Root layout
+    page.tsx                Landing / dev navigation
+    globals.css             Tailwind globals and theme
+    (admin)/                Admin route group
+      layout.tsx
+      dashboard/page.tsx
+    (monitor)/              Monitor route group
+      layout.tsx
+      dashboard/page.tsx
+    (modelo)/               Model route group
+      layout.tsx
+      dashboard/page.tsx
+    auth/
+      login/page.tsx        Login page
+  components/
+    ui/                     shadcn/ui components
+  lib/
+    utils.ts                Utility functions (cn helper)
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Environment Variables
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Copy `.env.example` to `.env.local` and adjust values as needed:
 
-## Deploy on Vercel
+| Variable               | Description              | Default                    |
+| ---------------------- | ------------------------ | -------------------------- |
+| `NEXT_PUBLIC_API_URL`  | Backend API base URL     | `http://localhost:8000`    |
+| `NEXT_PUBLIC_WS_URL`  | WebSocket server URL     | `ws://localhost:8000`      |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Docker
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Build and run the production image:
+
+```bash
+docker build -t erp-frontend .
+docker run -p 3000:3000 erp-frontend
+```
+
+## CI/CD
+
+GitHub Actions runs on every pull request to `main`:
+
+1. Install dependencies
+2. Lint (ESLint)
+3. Type check (tsc --noEmit)
+4. Build
+
+## Contributing
+
+1. Create a feature branch from `main`.
+2. Follow existing code conventions and project structure.
+3. Ensure `pnpm lint`, `pnpm type-check`, and `pnpm build` pass before opening a PR.
+4. Write clear commit messages following conventional commits format.
