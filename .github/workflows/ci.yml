@@ -30,8 +30,14 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Format check
+        run: pnpm format:check
+
       - name: Type check
         run: pnpm tsc --noEmit
+
+      - name: Test
+        run: pnpm test
 
       - name: Build
         run: pnpm build
