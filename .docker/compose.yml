@@ -1,0 +1,25 @@
+# ============================================================================
+# Development compose — erp-frontend
+# Usage: docker compose -f .docker/compose.yml up
+# ============================================================================
+
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: .docker/Dockerfile.dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - ../.env
+    environment:
+      NEXT_PUBLIC_API_URL: http://host.docker.internal:8000
+      NEXT_PUBLIC_WS_URL: ws://host.docker.internal:8000
+    volumes:
+      - ../src:/app/src:cached
+      - ../public:/app/public:cached
+      - ../next.config.ts:/app/next.config.ts:ro
+      - ../tsconfig.json:/app/tsconfig.json:ro
+      - ../tailwind.config.ts:/app/tailwind.config.ts:ro
+      - ../postcss.config.mjs:/app/postcss.config.mjs:ro
