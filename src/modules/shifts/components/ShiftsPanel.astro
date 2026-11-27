@@ -1,0 +1,95 @@
+---
+import { userDirectory } from "@/modules/identity";
+import { roomDirectory } from "@/modules/studio";
+import { SelectFilter } from "@/shared/fluent/components";
+import Fluent from "@/shared/fluent/Fluent.astro";
+import CursorNav from "@/shared/ui/CursorNav.astro";
+import EmptyState from "@/shared/ui/EmptyState.astro";
+import Notice from "@/shared/ui/Notice.astro";
+import Panel from "@/shared/ui/Panel.astro";
+import { SHIFT_STATUS, isShiftStatus } from "../labels";
+import { listShifts } from "../queries";
+import { ShiftTable } from "./ShiftTable";
+
+interface Props {
+  title?: string;
+  /** Compact = dashboard widget: few rows, no filters, link to the full list. */
+  compact?: boolean;
+}
+
+const { title = "Listado", compact = false } = Astro.props;
+const me = Astro.locals.me!;
+const params = Astro.url.searchParams;
+const raw = params.get("status");
+const status = !compact && isShiftStatus(raw) ? raw : undefined;
+
+const [shifts, rooms, people] = await Promise.all([
+  listShifts(Astro.locals, {
+    limit: compact ? 8 : 25,
+    status,
+    cursor: compact ? undefined : (params.get("cursor") ?? undefined),
+  }),
+  roomDirectory(Astro.locals),
+  userDirectory(Astro.locals),
+]);
+const id = compact ? "recent-shifts" : "shifts-list";
+const options = Object.entries(SHIFT_STATUS).map(([value, s]) => ({
+  value,
+  label: s.plural,
+}));
+---
+
+<Panel id={id} title={title}>
+  <div slot="actions">
+    {compact ? (
+      <a href="/app/shifts" class="btn btn-subtle">
+        Ver todos
+      </a>
+    ) : (
+      <Fluent
+        is={SelectFilter}
+        props={{
+          name: "status",
+          label: "Estado",
+          value: status,
+          allLabel: "Todos los estados",
+          options,
+        }}
+      />
+    )}
+  </div>
+  {!shifts.ok ? (
+    <div class="card-body">
+      <Notice message={shifts.message} />
+    </div>
+  ) : shifts.data.items.length ? (
+    <>
+      <Fluent
+        is={ShiftTable}
+        props={{
+          label: title,
+          shifts: shifts.data.items,
+          rooms: Object.fromEntries(rooms),
+          people: Object.fromEntries(people),
+          hideModel: me.role === "MODEL",
+        }}
+      />
+      {!compact && (
+        <CursorNav
+          next={shifts.data.next_cursor}
+          prev={shifts.data.prev_cursor}
+        />
+      )}
+    </>
+  ) : (
+    <EmptyState
+      title={status ? "No hay turnos con ese estado" : "Aún no hay turnos"}
+    >
+      {status
+        ? "Prueba con otro filtro."
+        : me.role === "OWNER" || me.role === "ADMIN"
+          ? "Cuando programes un turno aparecerá aquí."
+          : "Cuando te asignen un turno aparecerá aquí."}
+    </EmptyState>
+  )}
+</Panel>

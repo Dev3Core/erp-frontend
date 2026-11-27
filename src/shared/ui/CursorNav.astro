@@ -1,0 +1,43 @@
+---
+import Icon from "./Icon.astro";
+
+// Previous / next links for cursor-paginated lists. Keeps the other filters.
+interface Props {
+  next: string | null;
+  prev: string | null;
+}
+
+const { next, prev } = Astro.props;
+const link = (cursor: string) => {
+  const url = new URL(Astro.url);
+  url.searchParams.set("cursor", cursor);
+  return `${url.pathname}${url.search}`;
+};
+---
+
+{(next || prev) && (
+  <nav class="pager" aria-label="Paginación">
+    {prev ? (
+      <a class="btn btn-secondary" href={link(prev)}>
+        <Icon name="chevron-left" size={16} /> Anteriores
+      </a>
+    ) : (
+      <span />
+    )}
+    {next && (
+      <a class="btn btn-secondary" href={link(next)}>
+        Siguientes <Icon name="chevron-right" size={16} />
+      </a>
+    )}
+  </nav>
+)}
+
+<style>
+  .pager {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-block-start: 1px solid var(--border);
+  }
+</style>

@@ -1,0 +1,64 @@
+/* App tokens = aliases of Fluent UI v9 tokens (fluent-tokens.css), so the
+   Astro shell and the Fluent components share one design system.
+   Base: Fluent 2 neutral greys (no tint). Brand: champagne ramp.
+   Serif (Fraunces) is reserved for page titles. */
+
+:root {
+  --font-display: "Fraunces Variable", "Iowan Old Style", Georgia, serif;
+  --font-sans: var(--fontFamilyBase);
+  --font-mono: var(--fontFamilyMonospace);
+
+  --text-xs: var(--fontSizeBase100);
+  --text-sm: var(--fontSizeBase200);
+  --text-md: var(--fontSizeBase300);
+  --text-lg: var(--fontSizeBase500);
+  --text-xl: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  --text-2xl: clamp(1.875rem, 1.4rem + 1.8vw, 2.5rem);
+  --tracking-caps: 0.12em;
+
+  --space-1: var(--spacingVerticalXS);
+  --space-2: var(--spacingVerticalS);
+  --space-3: var(--spacingVerticalM);
+  --space-4: var(--spacingVerticalL);
+  --space-5: var(--spacingVerticalXXL);
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --radius: var(--borderRadiusXLarge);
+  --radius-sm: var(--borderRadiusMedium);
+  --hairline: var(--strokeWidthThin);
+
+  --sidebar-w: 16.5rem;
+  --header-h: 3.75rem;
+  --content-max: 84rem;
+
+  /* Surfaces: page < card. Dark: #1f1f1f page, #292929 cards. */
+  --bg: var(--colorNeutralBackground2);
+  --bg-raised: var(--colorNeutralBackground2);
+  --surface: var(--colorNeutralBackground1);
+  --surface-2: var(--colorNeutralBackground1Hover);
+  --border: var(--colorNeutralStroke2);
+  --border-strong: var(--colorNeutralStrokeAccessible);
+  --text: var(--colorNeutralForeground1);
+  --text-2: var(--colorNeutralForeground2);
+  --text-3: var(--colorNeutralForeground3);
+
+  --accent: var(--colorBrandBackground);
+  --accent-hover: var(--colorBrandBackgroundHover);
+  --accent-ink: var(--colorNeutralForegroundOnBrand);
+  --accent-text: var(--colorBrandForeground1);
+  --accent-soft: var(--colorSubtleBackgroundSelected);
+  --accent-line: var(--colorBrandStroke1);
+  --focus: var(--colorStrokeFocus2);
+
+  --success: var(--colorPaletteGreenForeground1);
+  --warning: var(--colorPaletteMarigoldForeground1);
+  --danger: var(--colorPaletteRedForeground1);
+  --info: var(--colorPaletteBlueForeground2);
+
+  --chart: var(--colorBrandBackground);
+  --shadow: var(--shadow4);
+  --shadow-lg: var(--shadow28);
+
+  accent-color: var(--colorBrandBackground);
+  scrollbar-color: var(--colorNeutralStroke1) transparent;
+}

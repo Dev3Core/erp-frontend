@@ -1,0 +1,15 @@
+---
+import AppShell from "@/app/layouts/AppShell.astro";
+import { isStaff } from "@/modules/identity";
+import { ShiftsPanel } from "@/modules/shifts";
+
+const me = Astro.locals.me!;
+---
+
+<AppShell
+  title="Turnos"
+  eyebrow="Operación"
+  lead={isStaff(me.role) ? "Todos los turnos del estudio." : "Tus turnos."}
+>
+  <ShiftsPanel />
+</AppShell>

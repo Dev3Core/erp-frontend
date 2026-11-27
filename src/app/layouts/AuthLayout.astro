@@ -1,0 +1,168 @@
+---
+import Brand from "../shell/Brand.astro";
+import Base from "./Base.astro";
+
+interface Props {
+  title: string;
+  heading: string;
+  lead?: string;
+}
+
+const { title, heading, lead } = Astro.props;
+---
+
+<Base title={title}>
+  <div class="auth">
+    <aside class="story" aria-hidden="true">
+      <Brand as="p" />
+      <figure>
+        <blockquote class="display">
+          Cada turno, cada token y cada pago del estudio, en un solo lugar.
+        </blockquote>
+        <figcaption class="eyebrow">Gestión para estudios webcam</figcaption>
+      </figure>
+      <ul class="pillars">
+        <li>
+          <span class="eyebrow">Turnos</span>Programación y seguimiento
+        </li>
+        <li>
+          <span class="eyebrow">Liquidaciones</span>USD a COP con la TRM del día
+        </li>
+        <li>
+          <span class="eyebrow">Equipo</span>Roles y acceso por estudio
+        </li>
+      </ul>
+    </aside>
+
+    <main class="panel">
+      <div class="panel-inner">
+        <div class="brand-mobile">
+          <Brand href="/" />
+        </div>
+        <header class="head">
+          <h1>{heading}</h1>
+          {lead && <p class="muted">{lead}</p>}
+        </header>
+        <slot />
+        <div class="after">
+          <slot name="after" />
+        </div>
+      </div>
+    </main>
+  </div>
+</Base>
+
+<style>
+  .auth {
+    display: grid;
+    min-height: 100dvh;
+  }
+  @media (width >= 60rem) {
+    .auth {
+      grid-template-columns: minmax(0, 1.1fr) minmax(26rem, 1fr);
+    }
+  }
+
+  .story {
+    display: none;
+  }
+  @media (width >= 60rem) {
+    .story {
+      position: relative;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 3rem;
+      padding: 3rem clamp(2.5rem, 5vw, 5rem);
+      overflow: hidden;
+      border-inline-end: var(--hairline) solid var(--border);
+      background:
+        radial-gradient(
+          120% 80% at 0% 100%,
+          var(--accent-soft),
+          transparent 60%
+        ),
+        var(--bg-raised);
+    }
+    /* Fine engraved frame, inset from the edges. */
+    .story::after {
+      content: "";
+      position: absolute;
+      inset: 1.25rem;
+      border: var(--hairline) solid var(--border);
+      border-radius: var(--radius);
+      pointer-events: none;
+    }
+  }
+  figure {
+    align-self: center;
+    display: grid;
+    gap: 1.5rem;
+    max-inline-size: 30ch;
+    margin: 0;
+  }
+  blockquote {
+    margin: 0;
+    font-size: clamp(2rem, 1.2rem + 2.2vw, 3.25rem);
+    font-weight: 400;
+    font-variation-settings:
+      "SOFT" 60,
+      "opsz" 96;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  figcaption {
+    color: var(--accent);
+  }
+  .pillars {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin: 0;
+    padding: 1.5rem 0 0;
+    border-block-start: var(--hairline) solid var(--border);
+    list-style: none;
+    color: var(--text-2);
+    font-size: var(--text-sm);
+  }
+  .pillars .eyebrow {
+    display: block;
+    margin-block-end: 0.375rem;
+  }
+
+  .panel {
+    display: grid;
+    place-items: center;
+    padding: clamp(1.5rem, 6vh, 4rem) 1rem 2rem;
+  }
+  .panel-inner {
+    display: grid;
+    gap: 1.75rem;
+    inline-size: min(24rem, 100%);
+  }
+  .brand-mobile {
+    justify-self: start;
+  }
+  @media (width >= 60rem) {
+    .brand-mobile {
+      display: none;
+    }
+  }
+  .head {
+    display: grid;
+    gap: 0.5rem;
+  }
+  .head h1 {
+    font-size: var(--text-2xl);
+    font-weight: 400;
+  }
+  .head p {
+    font-size: var(--text-md);
+  }
+  .after {
+    color: var(--text-2);
+    font-size: var(--text-sm);
+  }
+  .after:empty {
+    display: none;
+  }
+</style>

@@ -1,0 +1,29 @@
+---
+import "@/shared/styles/index.css";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Gestión de estudios webcam" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es-CO">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="description" content={description} />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>{title} · Estudio ERP</title>
+  </head>
+  <body>
+    <slot />
+    <script>
+      import "@/shared/scripts/enhance";
+    </script>
+  </body>
+</html>

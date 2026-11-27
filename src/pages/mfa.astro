@@ -1,0 +1,33 @@
+---
+import AuthLayout from "@/app/layouts/AuthLayout.astro";
+import { MfaForm, verifyMfa } from "@/modules/identity";
+import { safeNext } from "@/shared/lib/forms";
+
+const next = safeNext(Astro.url.searchParams.get("next"));
+if (!Astro.cookies.has("access_token")) {
+  return Astro.redirect(`/login?next=${encodeURIComponent(next)}`);
+}
+
+let result: Awaited<ReturnType<typeof verifyMfa>> | null = null;
+if (Astro.request.method === "POST") {
+  result = await verifyMfa(await Astro.request.formData(), {
+    cookies: Astro.cookies,
+    clientIp: Astro.clientAddress,
+  });
+  if (result.ok) return Astro.redirect(next, 303);
+  Astro.response.status = 400;
+}
+---
+
+<AuthLayout
+  title="Verificación en dos pasos"
+  heading="Verificación en dos pasos"
+  lead="Abre tu app de autenticación y escribe el código de 6 dígitos."
+>
+  <MfaForm failure={result && !result.ok ? result.failure : null} />
+  <form method="post" action="/logout" slot="after">
+    <button type="submit" class="btn btn-subtle">
+      Usar otra cuenta
+    </button>
+  </form>
+</AuthLayout>
