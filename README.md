@@ -1,101 +1,63 @@
-# ERP Frontend - Webcam Studio Management
+# ERP Frontend: gestión de estudios webcam
 
-Multi-tenant ERP SaaS frontend for webcam studio management. Built with Next.js 15 (App Router), TypeScript, Tailwind CSS v4, and shadcn/ui.
+Frontend del SaaS multi-tenant para estudios webcam, hecho con **Astro 7 en modo SSR**. Consume la API de [`erp-backend`](https://github.com/Dev3Core/erp-backend).
 
-## Tech Stack
+## Cómo funciona
 
-- Next.js 15 (App Router)
-- TypeScript 5 (strict mode)
-- Tailwind CSS v4
-- shadcn/ui (New York style, neutral base)
-- ESLint + Prettier
-- pnpm (package manager)
-- Docker (multi-stage production build)
+- **El servidor de Astro habla con la API; el navegador nunca la llama directamente.** Las cookies de sesión (`access_token` y `refresh_token`, ambas HttpOnly) llegan a Astro, que las reenvía a la API y retransmite las rotaciones. No hace falta configurar CORS ni cookies cross-site.
+- **Middleware** (`src/middleware.ts`): en `/app/*` llama a `GET /auth/me`. Si recibe 401, renueva el token con el refresh; si eso falla, redirige a `/login?next=…`. El rol solo da forma a la interfaz: los permisos los aplica la API.
+- **Formularios HTML** con POST y redirección (PRG): funcionan sin JavaScript. `security.checkOrigin` protege de CSRF y `security.csp` genera la CSP con hashes.
+- **JavaScript mínimo de mejora progresiva** (`src/scripts`): validación accesible (`aria-invalid` sincronizado con `:user-invalid`), mostrar u ocultar la contraseña, prevención del doble envío y drawer móvil.
+- **Fluent UI React v9 renderizado en servidor**: los controles son Fluent, pero React no llega al navegador. El tema (grises neutros de Fluent 2 y acento champán, con modo claro y oscuro) se genera con `node scripts/build-theme.mjs`. Las tablas se apilan en pantallas estrechas mediante container queries.
 
-## Prerequisites
+El código está organizado por módulos de dominio (`identity`, `studio`, `shifts`, `payroll`, `insights`) con fronteras comprobadas en los tests. Consulta [docs/architecture.md](docs/architecture.md).
 
-- Node.js 22
-- pnpm (latest)
+## Desarrollo local
 
-## Local Setup
+Requisitos: Node 22.23+ (o 24) y pnpm.
 
-```bash
-# Install dependencies
-pnpm install
+1. Levanta el backend (`make dev` en `erp-backend`).
+2. Instala dependencias y configura el entorno:
 
-# Start development server
-pnpm dev
-```
+   ```bash
+   pnpm install
+   ```
 
-The application will be available at `http://localhost:3000`.
+   ```bash
+   cp .env.example .env
+   ```
 
-## Available Scripts
+3. Opcional: carga datos de prueba (un estudio, equipo, salas, 30 días de turnos y liquidaciones). Las credenciales de prueba están al principio de `scripts/seed-dev.mjs`.
 
-| Command              | Description                          |
-| -------------------- | ------------------------------------ |
-| `pnpm dev`           | Start development server             |
-| `pnpm build`         | Create production build              |
-| `pnpm start`         | Start production server              |
-| `pnpm lint`          | Run ESLint                           |
-| `pnpm type-check`    | Run TypeScript type checking         |
-| `pnpm format`        | Format code with Prettier            |
-| `pnpm format:check`  | Check code formatting                |
+   ```bash
+   node scripts/seed-dev.mjs
+   ```
 
-## Project Structure
+4. Arranca el front en http://localhost:3000:
 
-```
-src/
-  app/
-    layout.tsx              Root layout
-    page.tsx                Landing / dev navigation
-    globals.css             Tailwind globals and theme
-    (admin)/                Admin route group
-      layout.tsx
-      dashboard/page.tsx
-    (monitor)/              Monitor route group
-      layout.tsx
-      dashboard/page.tsx
-    (modelo)/               Model route group
-      layout.tsx
-      dashboard/page.tsx
-    auth/
-      login/page.tsx        Login page
-  components/
-    ui/                     shadcn/ui components
-  lib/
-    utils.ts                Utility functions (cn helper)
-```
+   ```bash
+   pnpm dev
+   ```
 
-## Environment Variables
+## Scripts
 
-Copy `.env.example` to `.env.local` and adjust values as needed:
+| Comando                        | Qué hace                                      |
+| ------------------------------ | --------------------------------------------- |
+| `pnpm dev`                     | Servidor de desarrollo en el puerto 3000      |
+| `pnpm build`                   | Build de producción en `dist/`                |
+| `pnpm start`                   | Sirve el build (`node dist/server/entry.mjs`) |
+| `pnpm check`                   | Comprobación de tipos de Astro y TypeScript   |
+| `pnpm test`                    | Tests unitarios (Vitest)                      |
+| `pnpm format` / `format:check` | Prettier                                      |
 
-| Variable               | Description              | Default                    |
-| ---------------------- | ------------------------ | -------------------------- |
-| `NEXT_PUBLIC_API_URL`  | Backend API base URL     | `http://localhost:8000`    |
-| `NEXT_PUBLIC_WS_URL`  | WebSocket server URL     | `ws://localhost:8000`      |
+## Variables de entorno
 
-## Docker
+| Variable        | Descripción                                                                                 |
+| --------------- | ------------------------------------------------------------------------------------------- |
+| `API_URL`       | URL de `erp-backend` vista desde el servidor de Astro (por defecto `http://localhost:8000`) |
+| `COOKIE_SECURE` | `false` solo para probar el build sin HTTPS; en producción las cookies salen con `Secure`   |
+| `HOST`, `PORT`  | Dirección y puerto del servidor Node en producción                                          |
 
-Build and run the production image:
+## Producción
 
-```bash
-docker build -t erp-frontend .
-docker run -p 3000:3000 erp-frontend
-```
-
-## CI/CD
-
-GitHub Actions runs on every pull request to `main`:
-
-1. Install dependencies
-2. Lint (ESLint)
-3. Type check (tsc --noEmit)
-4. Build
-
-## Contributing
-
-1. Create a feature branch from `main`.
-2. Follow existing code conventions and project structure.
-3. Ensure `pnpm lint`, `pnpm type-check`, and `pnpm build` pass before opening a PR.
-4. Write clear commit messages following conventional commits format.
+`.docker/Dockerfile` construye una imagen multi-stage que ejecuta Node como usuario no-root. El front y la API deben servirse con HTTPS y desde el mismo sitio registrable. La planificación y las tareas abiertas están en Linear (proyecto _ERP Webcam — MVP funcional_).

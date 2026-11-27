@@ -1,0 +1,25 @@
+---
+import type { ComponentType } from "react";
+import { renderFluent } from "./render";
+
+// Renders a Fluent UI React component to static HTML with its CSS inlined
+// just before it. Usage: <Fluent is={MyTable} props={{ rows }} />
+
+interface Props {
+  is: ComponentType<any>;
+  props?: Record<string, unknown>;
+}
+
+const { is, props = {} } = Astro.props;
+const locals = Astro.locals;
+locals.fluentCount += 1;
+const { html, css } = renderFluent(
+  is,
+  props,
+  locals.fluentSeen,
+  `f${locals.fluentCount}-`,
+);
+---
+
+{css && <style is:inline set:html={css} />}
+<Fragment set:html={html} />

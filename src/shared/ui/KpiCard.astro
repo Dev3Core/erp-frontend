@@ -1,0 +1,49 @@
+---
+interface Props {
+  label: string;
+  value: string;
+  note?: string;
+  /** Marks the headline figure of a group (larger, accent rule). */
+  lead?: boolean;
+}
+
+const { label, value, note, lead = false } = Astro.props;
+---
+
+<div class:list={["kpi", "card", { lead }]}>
+  <p class="eyebrow">{label}</p>
+  <p class="value num">{value}</p>
+  {note && <p class="note">{note}</p>}
+</div>
+
+<style>
+  .kpi {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: 0.5rem;
+    padding: 1.25rem 1.5rem 1.375rem;
+    overflow: hidden;
+  }
+  .value {
+    font-size: 1.75rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .note {
+    color: var(--text-3);
+    font-size: var(--text-sm);
+  }
+  /* Headline figure: a thin champagne rule along the top edge. */
+  .lead::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    block-size: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent 85%);
+  }
+  .lead .value {
+    font-size: 2.25rem;
+  }
+</style>

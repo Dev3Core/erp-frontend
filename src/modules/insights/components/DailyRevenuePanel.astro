@@ -1,0 +1,46 @@
+---
+import Notice from "@/shared/ui/Notice.astro";
+import ColumnChart from "@/shared/ui/ColumnChart.astro";
+import Panel from "@/shared/ui/Panel.astro";
+import {
+  formatDay,
+  formatInt,
+  formatUsd,
+  todayBogota,
+  toNumber,
+} from "@/shared/lib/format";
+import { RANGE_DAYS, getDailyRevenue } from "../queries";
+
+const daily = await getDailyRevenue(Astro.locals);
+
+// Every day of the range, so a day without shifts shows as zero, not a gap.
+const byDay = new Map(
+  daily.ok ? daily.data.items.map((d) => [d.day, toNumber(d.total_usd)]) : [],
+);
+const points = Array.from({ length: RANGE_DAYS }, (_, i) => {
+  const day = todayBogota(i - (RANGE_DAYS - 1));
+  const value = byDay.get(day) ?? 0;
+  return { key: day, label: formatDay(day), value, display: formatUsd(value) };
+});
+---
+
+<Panel
+  id="daily-title"
+  title="Ingresos diarios"
+  description="USD por día, suma de los turnos"
+>
+  <div class="card-body">
+    {daily.ok ? (
+      <ColumnChart
+        id="daily"
+        title="Ingresos diarios en USD"
+        points={points}
+        formatTick={(n) =>
+          n >= 10_000 ? `${Math.round(n / 1000)} K` : formatInt(n)
+        }
+      />
+    ) : (
+      <Notice message={daily.message ?? ""} />
+    )}
+  </div>
+</Panel>

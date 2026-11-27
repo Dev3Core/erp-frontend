@@ -1,0 +1,29 @@
+---
+import Fluent from "@/shared/fluent/Fluent.astro";
+import EmptyState from "@/shared/ui/EmptyState.astro";
+import Notice from "@/shared/ui/Notice.astro";
+import Panel from "@/shared/ui/Panel.astro";
+import { listRooms } from "../queries";
+import { RoomsTable } from "./RoomsTable";
+
+const rooms = await listRooms(Astro.locals, { is_active: true });
+---
+
+<Panel
+  id="rooms-title"
+  title="Salas activas"
+  description={rooms.ok ? `${rooms.data.total} en total` : undefined}
+>
+  {!rooms.ok ? (
+    <div class="card-body">
+      <Notice message={rooms.message} />
+    </div>
+  ) : rooms.data.items.length ? (
+    <Fluent is={RoomsTable} props={{ rooms: rooms.data.items }} />
+  ) : (
+    <EmptyState title="Aún no hay salas">
+      Registra las cuentas de Chaturbate o Stripchat del estudio para programar
+      turnos.
+    </EmptyState>
+  )}
+</Panel>

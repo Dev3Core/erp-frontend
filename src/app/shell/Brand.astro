@@ -1,0 +1,70 @@
+---
+interface Props {
+  href?: string;
+  as?: "a" | "p";
+  id?: string;
+}
+
+const { href = "/app", as = "a", id } = Astro.props;
+const Tag = as;
+---
+
+<Tag class="brand" href={as === "a" ? href : undefined} id={id}>
+  <svg
+    class="mark"
+    viewBox="0 0 32 32"
+    width="28"
+    height="28"
+    aria-hidden="true"
+  >
+    <rect
+      x="0.5"
+      y="0.5"
+      width="31"
+      height="31"
+      rx="7.5"
+      fill="none"
+      stroke="currentColor"
+      opacity="0.55"
+    ></rect>
+    <path
+      d="M10 11h12M10 16h8M10 21h12"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+      stroke-linecap="round"
+    ></path>
+  </svg>
+  <span class="name">
+    Estudio <span class="suffix">ERP</span>
+  </span>
+</Tag>
+
+<style>
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .mark {
+    flex: none;
+    color: var(--accent);
+  }
+  .name {
+    font-family: var(--font-display);
+    font-size: 1.1875rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .suffix {
+    color: var(--text-3);
+    font-family: var(--font-sans);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: var(--tracking-caps);
+    vertical-align: 0.35em;
+  }
+</style>

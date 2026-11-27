@@ -1,0 +1,22 @@
+---
+// Titled card section. `actions` slot sits on the header's trailing edge.
+interface Props {
+  id: string;
+  title: string;
+  description?: string;
+  class?: string;
+}
+
+const { id, title, description, class: className } = Astro.props;
+---
+
+<section class:list={["card", className]} aria-labelledby={id}>
+  <header class="card-header">
+    <div>
+      <h2 id={id}>{title}</h2>
+      {description && <p>{description}</p>}
+    </div>
+    <slot name="actions" />
+  </header>
+  <slot />
+</section>

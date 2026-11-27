@@ -1,0 +1,396 @@
+---
+import { ROLE_LABEL } from "@/modules/identity";
+import Icon from "@/shared/ui/Icon.astro";
+import Fluent from "@/shared/fluent/Fluent.astro";
+import { isCurrent, navFor } from "../navigation";
+import Brand from "../shell/Brand.astro";
+import { SideNav } from "../shell/SideNav";
+import { UserBadge } from "../shell/UserBadge";
+import Base from "./Base.astro";
+
+interface Props {
+  title: string;
+  /** Small caps line above the title (section or context). */
+  eyebrow?: string;
+  lead?: string;
+}
+
+const { title, eyebrow, lead } = Astro.props;
+const me = Astro.locals.me!;
+const today = new Intl.DateTimeFormat("es-CO", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  timeZone: "America/Bogota",
+}).format(new Date());
+const items = navFor(me.role);
+const current =
+  items.find((i) => isCurrent(Astro.url.pathname, i.href))?.href ?? null;
+---
+
+<Base title={title}>
+  <a class="skip-link" href="#main">
+    Saltar al contenido
+  </a>
+
+  <div class="shell">
+    <aside class="sidebar" aria-label="Barra lateral">
+      <Brand />
+      <Fluent
+        is={SideNav}
+        props={{ items, current, label: "Navegación principal" }}
+      />
+      <div class="studio">
+        <p class="eyebrow">Estudio</p>
+        <p class="studio-name">{me.studio_slug}</p>
+      </div>
+    </aside>
+
+    <div class="main-col">
+      <header class="topbar">
+        <button
+          id="drawer-open"
+          class="btn btn-subtle btn-icon menu-btn"
+          type="button"
+          aria-label="Menú"
+          aria-expanded="false"
+          aria-controls="drawer"
+        >
+          <Icon name="menu" size={20} />
+        </button>
+        <p class="today">{today}</p>
+        <div class="user">
+          <Fluent
+            is={UserBadge}
+            props={{ name: me.full_name, role: ROLE_LABEL[me.role] }}
+          />
+          <form method="post" action="/logout">
+            <button type="submit" class="btn btn-subtle">
+              <Icon name="logout" size={16} />
+              <span>Salir</span>
+            </button>
+          </form>
+        </div>
+      </header>
+
+      <main id="main" class="content" tabindex="-1">
+        <div class="page-head">
+          <div class="page-title">
+            {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+            <h1>{title}</h1>
+            {lead && <p class="lead">{lead}</p>}
+          </div>
+          <div class="page-actions">
+            <slot name="actions" />
+          </div>
+        </div>
+        <slot />
+      </main>
+    </div>
+  </div>
+
+  <!-- Mobile navigation: a modal drawer that can be swiped closed. -->
+  <dialog class="Drawer" id="drawer" aria-labelledby="drawer-title">
+    <div class="Drawer-scroller">
+      <div class="Drawer-sheet">
+        <div class="drawer-head">
+          <Brand as="p" id="drawer-title" />
+          <button
+            id="drawer-close"
+            class="btn btn-subtle btn-icon"
+            type="button"
+            aria-label="Cerrar menú"
+            autofocus
+          >
+            <Icon name="close" size={20} />
+          </button>
+        </div>
+        <Fluent
+          is={SideNav}
+          props={{ items, current, label: "Navegación principal (móvil)" }}
+        />
+      </div>
+    </div>
+  </dialog>
+</Base>
+
+<script>
+  import "../shell/drawer";
+</script>
+
+<style>
+  .shell {
+    display: grid;
+    min-height: 100dvh;
+  }
+  @media (width >= 64rem) {
+    .shell {
+      grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+    }
+  }
+
+  .sidebar {
+    display: none;
+  }
+  @media (width >= 64rem) {
+    .sidebar {
+      position: sticky;
+      inset-block-start: 0;
+      display: grid;
+      grid-template-rows: var(--header-h) 1fr auto;
+      align-items: start;
+      block-size: 100dvh;
+      padding: 0 1rem 1.25rem;
+      border-inline-end: var(--hairline) solid var(--border);
+      background: var(--bg-raised);
+    }
+    .sidebar > :global(.brand) {
+      align-self: center;
+      padding-inline: 0.875rem;
+    }
+    .menu-btn {
+      display: none;
+    }
+  }
+  /* Fluent NavDrawer sits inside our sidebar/drawer: inherit their surface. */
+  .sidebar :global(.fui-NavDrawer),
+  .Drawer-sheet :global(.fui-NavDrawer) {
+    inline-size: 100%;
+    block-size: auto;
+    border: 0;
+    background: transparent;
+  }
+  .sidebar :global(.fui-NavDrawerBody),
+  .Drawer-sheet :global(.fui-NavDrawerBody) {
+    padding-inline: 0;
+  }
+  .sidebar :global(.fui-NavItem:not(:hover)),
+  .Drawer-sheet :global(.fui-NavItem:not(:hover)) {
+    background-color: transparent;
+  }
+  .sidebar :global(.fui-NavItem[aria-current="page"]),
+  .Drawer-sheet :global(.fui-NavItem[aria-current="page"]) {
+    background-color: var(--colorSubtleBackgroundSelected);
+  }
+  .sidebar :global(.fui-NavDrawerHeader),
+  .Drawer-sheet :global(.fui-NavDrawerHeader) {
+    display: none;
+  }
+  .nav-label {
+    margin: 1.75rem 0 0.75rem;
+    padding-inline: 0.875rem;
+  }
+  .studio {
+    display: grid;
+    gap: 0.25rem;
+    padding: 1rem 0.875rem 0;
+    border-block-start: var(--hairline) solid var(--border);
+  }
+  .studio-name {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    overflow-wrap: anywhere;
+  }
+
+  .main-col {
+    min-inline-size: 0;
+  }
+
+  .topbar {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    block-size: var(--header-h);
+    padding-inline: 1rem;
+    border-block-end: var(--hairline) solid var(--border);
+    background: color-mix(in oklch, var(--bg) 90%, transparent);
+    backdrop-filter: blur(10px);
+  }
+  @media (width >= 64rem) {
+    .topbar {
+      padding-inline: 2.5rem;
+    }
+  }
+  .today {
+    margin-inline-end: auto;
+    color: var(--text-3);
+    font-size: var(--text-sm);
+  }
+  .today::first-letter {
+    text-transform: uppercase;
+  }
+  @media (width < 40rem) {
+    .today {
+      display: none;
+    }
+    .user {
+      margin-inline-start: auto;
+    }
+  }
+
+  .user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-inline-size: 0;
+  }
+  .avatar {
+    display: grid;
+    place-items: center;
+    flex: none;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    border: var(--hairline) solid var(--accent-line);
+    border-radius: 50%;
+    color: var(--accent);
+    font-family: var(--font-display);
+    font-size: 0.875rem;
+  }
+  .user-text {
+    display: grid;
+    min-inline-size: 0;
+    line-height: 1.25;
+  }
+  .user-name {
+    overflow: hidden;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .user-role {
+    color: var(--text-3);
+    font-size: var(--text-xs);
+  }
+  @media (width < 30rem) {
+    .user-text {
+      display: none;
+    }
+  }
+
+  .content {
+    display: grid;
+    gap: var(--space-5);
+    inline-size: min(var(--content-max), 100%);
+    margin-inline: auto;
+    padding: 2rem 1rem 4rem;
+  }
+  .content:focus {
+    outline: none;
+  }
+  @media (width >= 48rem) {
+    .content {
+      gap: var(--space-6);
+      padding: 3rem 2.5rem 5rem;
+    }
+  }
+
+  .page-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.25rem;
+  }
+  .page-title {
+    display: grid;
+    gap: 0.5rem;
+  }
+  .page-title h1 {
+    font-size: var(--text-2xl);
+    font-weight: 400;
+  }
+  .lead {
+    color: var(--text-2);
+  }
+  .page-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  /* ---- drawer (modern-web-guidance: navigation-drawer) ---- */
+  .Drawer {
+    --drawer-width: min(18rem, 80dvw, 100dvw - 24px);
+    --drawer-backdrop: 0;
+    inset: 0;
+    width: auto;
+    height: auto;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    overflow: visible;
+  }
+  .Drawer::backdrop {
+    background: oklch(6% 0.01 70);
+    opacity: calc(var(--drawer-backdrop) * 0.6);
+  }
+  .Drawer-scroller {
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--drawer-width) 100%;
+    overflow-x: scroll;
+    overscroll-behavior: none;
+    scrollbar-width: none;
+    scroll-snap-type: x mandatory;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .Drawer-scroller {
+      scroll-behavior: smooth;
+    }
+  }
+  .Drawer-scroller::after {
+    content: "";
+    scroll-snap-align: end;
+    scroll-initial-target: nearest;
+  }
+  .Drawer-sheet {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    align-content: start;
+    gap: 1.25rem;
+    height: 100svh;
+    padding: 0.75rem;
+    overflow-y: auto;
+    border-inline-end: var(--hairline) solid var(--border);
+    background: var(--bg-raised);
+    color: var(--text);
+    scroll-snap-align: start;
+    scrollbar-width: none;
+  }
+  .drawer-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-inline-start: 0.875rem;
+  }
+  @supports (animation-timeline: scroll()) {
+    .Drawer {
+      timeline-scope: --drawer-fade;
+      animation: fade-drawer-backdrop linear both;
+      animation-timeline: --drawer-fade;
+    }
+    .Drawer-scroller {
+      scroll-timeline: --drawer-fade x;
+    }
+    @property --drawer-backdrop {
+      syntax: "<number>";
+      inherits: true;
+      initial-value: 0;
+    }
+    @keyframes fade-drawer-backdrop {
+      0% {
+        --drawer-backdrop: 1;
+      }
+      100% {
+        --drawer-backdrop: 0;
+      }
+    }
+  }
+</style>

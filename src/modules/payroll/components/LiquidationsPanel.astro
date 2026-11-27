@@ -1,0 +1,58 @@
+---
+import { SelectFilter } from "@/shared/fluent/components";
+import Fluent from "@/shared/fluent/Fluent.astro";
+import CursorNav from "@/shared/ui/CursorNav.astro";
+import EmptyState from "@/shared/ui/EmptyState.astro";
+import Notice from "@/shared/ui/Notice.astro";
+import Panel from "@/shared/ui/Panel.astro";
+import { LIQUIDATION_STATUS, isLiquidationStatus } from "../labels";
+import { listLiquidations } from "../queries";
+import { LiquidationsTable } from "./LiquidationsTable";
+
+const params = Astro.url.searchParams;
+const raw = params.get("status");
+const status = isLiquidationStatus(raw) ? raw : undefined;
+const liqs = await listLiquidations(Astro.locals, {
+  status,
+  cursor: params.get("cursor") ?? undefined,
+});
+const options = Object.entries(LIQUIDATION_STATUS).map(([value, s]) => ({
+  value,
+  label: s.plural,
+}));
+---
+
+<Panel id="liq-title" title="Listado">
+  <div slot="actions">
+    <Fluent
+      is={SelectFilter}
+      props={{
+        name: "status",
+        label: "Estado",
+        value: status,
+        allLabel: "Todos los estados",
+        options,
+      }}
+    />
+  </div>
+  {!liqs.ok ? (
+    <div class="card-body">
+      <Notice message={liqs.message} />
+    </div>
+  ) : liqs.data.items.length ? (
+    <>
+      <Fluent is={LiquidationsTable} props={{ rows: liqs.data.items }} />
+      <CursorNav next={liqs.data.next_cursor} prev={liqs.data.prev_cursor} />
+    </>
+  ) : (
+    <EmptyState
+      title={
+        status
+          ? "No hay liquidaciones con ese estado"
+          : "Aún no hay liquidaciones"
+      }
+    >
+      Se crean a partir de un turno finalizado.
+    </EmptyState>
+  )}
+</Panel>

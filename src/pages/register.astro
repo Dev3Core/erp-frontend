@@ -1,0 +1,28 @@
+---
+import AuthLayout from "@/app/layouts/AuthLayout.astro";
+import { RegisterForm, register } from "@/modules/identity";
+
+let result: Awaited<ReturnType<typeof register>> | null = null;
+
+if (Astro.request.method === "POST") {
+  result = await register(await Astro.request.formData(), {
+    clientIp: Astro.clientAddress,
+  });
+  if (result.ok) return Astro.redirect("/login?registered=1", 303);
+  Astro.response.status = 400;
+}
+---
+
+<AuthLayout
+  title="Crear estudio"
+  heading="Crea tu estudio"
+  lead="Serás el propietario. Después podrás invitar a monitores y modelos."
+>
+  <RegisterForm
+    values={result?.values}
+    failure={result && !result.ok ? result.failure : null}
+  />
+  <p slot="after">
+    ¿Ya tienes cuenta? <a href="/login">Iniciar sesión</a>
+  </p>
+</AuthLayout>

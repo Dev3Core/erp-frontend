@@ -1,0 +1,23 @@
+---
+import Fluent from "@/shared/fluent/Fluent.astro";
+import Notice from "@/shared/ui/Notice.astro";
+import Panel from "@/shared/ui/Panel.astro";
+import { listUsers } from "../queries";
+import { UsersTable } from "./UsersTable";
+
+const users = await listUsers(Astro.locals);
+---
+
+<Panel
+  id="users-title"
+  title="Personas"
+  description={users.ok ? `${users.data.total} en total` : undefined}
+>
+  {users.ok ? (
+    <Fluent is={UsersTable} props={{ users: users.data.items }} />
+  ) : (
+    <div class="card-body">
+      <Notice message={users.message} />
+    </div>
+  )}
+</Panel>

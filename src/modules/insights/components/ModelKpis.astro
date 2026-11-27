@@ -1,0 +1,40 @@
+---
+import Notice from "@/shared/ui/Notice.astro";
+import KpiCard from "@/shared/ui/KpiCard.astro";
+import { formatInt, formatUsd } from "@/shared/lib/format";
+import { getBestMonitor, getModelOverview } from "../queries";
+
+const [overview, best] = await Promise.all([
+  getModelOverview(Astro.locals),
+  getBestMonitor(Astro.locals),
+]);
+const bestMonitor = best.ok ? best.data : null;
+---
+
+<section aria-labelledby="kpi-title">
+  <h2 id="kpi-title" class="visually-hidden">
+    Tus indicadores
+  </h2>
+  {overview.ok ? (
+    <div class="kpi-grid">
+      <KpiCard
+        lead
+        label="Tus ingresos · 30 días"
+        value={formatUsd(overview.data.total_usd)}
+        note={`${formatInt(overview.data.total_shifts)} turnos`}
+      />
+      <KpiCard label="Tokens" value={formatInt(overview.data.total_tokens)} />
+      <KpiCard
+        label="Mejor monitor"
+        value={bestMonitor ? bestMonitor.full_name : "—"}
+        note={
+          bestMonitor
+            ? `${formatUsd(bestMonitor.total_usd)} en ${formatInt(bestMonitor.total_shifts)} turnos`
+            : "Aún no hay datos suficientes"
+        }
+      />
+    </div>
+  ) : (
+    <Notice message={overview.message ?? ""} />
+  )}
+</section>

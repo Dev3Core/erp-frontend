@@ -1,0 +1,37 @@
+---
+import AuthLayout from "@/app/layouts/AuthLayout.astro";
+import { LoginForm, login } from "@/modules/identity";
+import { safeNext } from "@/shared/lib/forms";
+
+const next = safeNext(Astro.url.searchParams.get("next"));
+let result: Awaited<ReturnType<typeof login>> | null = null;
+
+if (Astro.request.method === "POST") {
+  result = await login(await Astro.request.formData(), {
+    cookies: Astro.cookies,
+    clientIp: Astro.clientAddress,
+  });
+  if (result.ok) {
+    return Astro.redirect(
+      result.value.mfaRequired ? `/mfa?next=${encodeURIComponent(next)}` : next,
+      303,
+    );
+  }
+  Astro.response.status = 400;
+}
+---
+
+<AuthLayout
+  title="Iniciar sesión"
+  heading="Iniciar sesión"
+  lead="Entra con el correo de tu estudio."
+>
+  <LoginForm
+    email={result?.email}
+    failure={result && !result.ok ? result.failure : null}
+    registered={Astro.url.searchParams.has("registered")}
+  />
+  <p slot="after">
+    ¿Tu estudio aún no tiene cuenta? <a href="/register">Crear estudio</a>
+  </p>
+</AuthLayout>

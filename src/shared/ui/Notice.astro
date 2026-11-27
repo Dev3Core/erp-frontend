@@ -1,0 +1,14 @@
+---
+import { Notice as FluentNotice } from "@/shared/fluent/components";
+import Fluent from "@/shared/fluent/Fluent.astro";
+
+// Fluent MessageBar for inline errors or confirmations.
+interface Props {
+  message: string;
+  tone?: "error" | "success";
+}
+
+const { message, tone = "error" } = Astro.props;
+---
+
+<Fluent is={FluentNotice} props={{ tone, children: message }} />

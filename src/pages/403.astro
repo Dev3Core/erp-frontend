@@ -1,0 +1,18 @@
+---
+import Base from "@/app/layouts/Base.astro";
+Astro.response.status = 403;
+---
+
+<Base title="Sin acceso">
+  <main class="status-page">
+    <p class="code">403</p>
+    <h1>No tienes acceso a esta sección</h1>
+    <p class="muted">
+      Tu rol no permite ver esta página. Si crees que es un error, habla con el
+      administrador del estudio.
+    </p>
+    <a class="btn btn-primary" href="/app">
+      Volver al resumen
+    </a>
+  </main>
+</Base>

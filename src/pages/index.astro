@@ -1,0 +1,6 @@
+---
+import { hasSessionCookies } from "@/modules/identity";
+
+// The app lives under /app; the middleware sends guests to /login.
+return Astro.redirect(hasSessionCookies(Astro.cookies) ? "/app" : "/login");
+---

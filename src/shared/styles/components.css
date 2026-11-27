@@ -1,0 +1,314 @@
+/* Layout and glue for Fluent UI components rendered on the server.
+   Controls (buttons, inputs, selects, badges, tables, message bars) are Fluent;
+   this file only covers what Fluent does not: page surfaces, layout, the
+   validation/reveal behaviour driven by enhance.ts and narrow-table stacking. */
+
+/* Each Fluent render is wrapped in a FluentProvider: let the page show through. */
+div.fluent-root {
+  background-color: transparent;
+  color: inherit;
+  text-align: inherit;
+}
+
+/* ------------------------------------------------------------------ forms */
+
+.form {
+  display: grid;
+  gap: var(--space-5);
+}
+.auth-form {
+  display: grid;
+  gap: var(--space-5);
+}
+.field {
+  display: grid;
+  gap: var(--spacingVerticalXS);
+}
+.btn-block {
+  inline-size: 100%;
+}
+
+/* Client-side validation message (shown after interaction, see enhance.ts). */
+.field-error {
+  display: none;
+  margin: 0;
+  color: var(--colorPaletteRedForeground1);
+  font-size: var(--fontSizeBase200);
+}
+.field-error::before {
+  content: "Error: ";
+  font-weight: var(--fontWeightSemibold);
+}
+.field:has(input:user-invalid) .field-error {
+  display: block;
+}
+.field:has(input:user-invalid) .fui-Input {
+  border-color: var(--colorPaletteRedBorder2);
+}
+
+/* Show / hide password icons, driven by aria-pressed on the toggle. */
+.reveal-icons {
+  display: inline-flex;
+}
+.reveal-icons [data-icon="eye-off"],
+[aria-pressed="true"] .reveal-icons [data-icon="eye"] {
+  display: none;
+}
+[aria-pressed="true"] .reveal-icons [data-icon="eye-off"] {
+  display: inline-flex;
+}
+
+.otp-input {
+  font-family: var(--fontFamilyMonospace);
+  font-size: 1.375rem;
+  letter-spacing: 0.4em;
+  text-align: center;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacingHorizontalS);
+}
+
+/* --------------------------------------------------------------- surfaces */
+
+.card {
+  border: var(--strokeWidthThin) solid var(--colorNeutralStroke2);
+  border-radius: var(--borderRadiusXLarge);
+  background: var(--colorNeutralBackground1);
+  box-shadow: var(--shadow4);
+}
+.card-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 1rem 1.25rem;
+  border-block-end: var(--strokeWidthThin) solid var(--colorNeutralStroke2);
+}
+.card-header h2 {
+  font-size: var(--fontSizeBase400);
+  font-weight: var(--fontWeightSemibold);
+}
+.card-header p {
+  color: var(--colorNeutralForeground3);
+  font-size: var(--fontSizeBase200);
+}
+.card-body {
+  padding: 1.25rem;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
+  gap: var(--space-4);
+}
+@media (width >= 75rem) {
+  .kpi-grid:has(> :nth-child(4)) {
+    grid-template-columns: 1.35fr repeat(3, 1fr);
+  }
+  .kpi-grid:not(:has(> :nth-child(4))) {
+    grid-template-columns: 1.35fr repeat(2, 1fr);
+  }
+}
+
+.empty {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+.empty h3 {
+  font-size: var(--fontSizeBase400);
+  font-weight: var(--fontWeightSemibold);
+}
+.empty p {
+  max-inline-size: 38ch;
+  color: var(--colorNeutralForeground2);
+  font-size: var(--fontSizeBase300);
+}
+
+/* ----------------------------------------------------------------- tables */
+
+.table-wrapper {
+  overflow: auto;
+  max-inline-size: 100%;
+  container-type: inline-size;
+}
+.table-wrapper .fui-Table {
+  min-inline-size: 100%;
+  /* Fluent defaults to fixed layout (equal columns); size to content. */
+  table-layout: auto;
+}
+.table-wrapper .fui-TableCell,
+.table-wrapper .fui-TableHeaderCell {
+  white-space: nowrap;
+}
+.table-wrapper .fui-TableHeaderCell {
+  color: var(--colorNeutralForeground3);
+  font-size: var(--fontSizeBase200);
+}
+.table-wrapper .fui-TableCell,
+.table-wrapper .fui-TableHeaderCell {
+  padding-inline: 0.75rem;
+}
+.table-wrapper .fui-TableCell:first-child,
+.table-wrapper .fui-TableHeaderCell:first-child {
+  padding-inline-start: 1.25rem;
+}
+.cell-sub {
+  display: block;
+  color: var(--colorNeutralForeground3);
+  font-size: var(--fontSizeBase200);
+  font-weight: var(--fontWeightRegular);
+}
+.align-end {
+  text-align: end;
+  justify-content: flex-end;
+}
+
+/* Stacked layout when the table's container is narrow; labels come from
+   data-label on each cell. Two-class selectors beat Griffel's atomic ones. */
+@container (width < 40rem) {
+  .table-wrapper .fui-Table,
+  .table-wrapper .fui-TableBody,
+  .table-wrapper .fui-TableRow,
+  .table-wrapper .fui-TableCell {
+    display: block;
+    inline-size: auto;
+    block-size: auto;
+  }
+  .table-wrapper .fui-TableHeader {
+    display: none;
+  }
+  .table-wrapper .fui-TableRow {
+    padding: 0.875rem 1.25rem;
+  }
+  .table-wrapper .fui-TableCell,
+  .table-wrapper .fui-TableCell:first-child {
+    padding: 0.2rem 0;
+  }
+  .table-wrapper .fui-TableCell:first-child {
+    padding-block-end: 0.5rem;
+    font-weight: var(--fontWeightSemibold);
+  }
+  .table-wrapper .fui-TableCell[data-label] {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .table-wrapper .fui-TableCell[data-label]::before {
+    content: attr(data-label);
+    color: var(--colorNeutralForeground3);
+  }
+}
+
+/* ----------------------------------------------------------- status pages */
+
+.status-page {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  max-inline-size: 34rem;
+  margin: 0 auto;
+  padding: 18vh 1rem 2rem;
+  text-align: center;
+}
+.status-page h1 {
+  font-size: var(--text-2xl);
+}
+
+/* ------------------------------------------------------------ shell buttons */
+/* For buttons in Astro markup (shell, pagination, status pages). Mirrors the
+   Fluent v9 Button spec and tokens so it is indistinguishable from it. */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacingHorizontalSNudge);
+  min-block-size: 32px;
+  min-inline-size: 32px;
+  padding: 5px var(--spacingHorizontalM);
+  border: var(--strokeWidthThin) solid transparent;
+  border-radius: var(--borderRadiusMedium);
+  background: transparent;
+  color: var(--colorNeutralForeground1);
+  font-family: var(--fontFamilyBase);
+  font-size: var(--fontSizeBase300);
+  font-weight: var(--fontWeightSemibold);
+  line-height: var(--lineHeightBase300);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition-duration: var(--durationFaster);
+  transition-property: background, border, color;
+  transition-timing-function: var(--curveEasyEase);
+}
+.btn svg {
+  flex: none;
+}
+.btn:focus-visible {
+  outline: var(--strokeWidthThick) solid var(--colorStrokeFocus2);
+  outline-offset: 1px;
+}
+.btn-primary {
+  background: var(--colorBrandBackground);
+  color: var(--colorNeutralForegroundOnBrand);
+}
+.btn-primary:hover {
+  background: var(--colorBrandBackgroundHover);
+  color: var(--colorNeutralForegroundOnBrand);
+}
+.btn-secondary {
+  border-color: var(--colorNeutralStroke1);
+  background: var(--colorNeutralBackground1);
+}
+.btn-secondary:hover {
+  border-color: var(--colorNeutralStroke1Hover);
+  background: var(--colorNeutralBackground1Hover);
+  color: var(--colorNeutralForeground1);
+}
+.btn-subtle {
+  color: var(--colorNeutralForeground2);
+}
+.btn-subtle:hover {
+  background: var(--colorSubtleBackgroundHover);
+  color: var(--colorNeutralForeground2Hover);
+}
+.btn-icon {
+  padding: 0;
+  inline-size: 32px;
+}
+@media (pointer: coarse) {
+  .btn {
+    min-block-size: 44px;
+  }
+  .btn-icon {
+    inline-size: 44px;
+  }
+}
+
+/* Native table (chart table view). */
+.table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: var(--fontSizeBase200);
+}
+.table th,
+.table td {
+  padding: 0.5rem 0.75rem;
+  border-block-end: var(--strokeWidthThin) solid var(--colorNeutralStroke2);
+  text-align: start;
+}
+.table .align-end {
+  text-align: end;
+}
+
+.table-wrapper .fui-TableHeaderCell.align-end .fui-TableHeaderCell__button {
+  justify-content: flex-end;
+}
